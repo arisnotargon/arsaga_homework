@@ -1,0 +1,5 @@
+/back/vendor
+/back/mysql
+/back/elasticsearch
+
+/front/node_modules
