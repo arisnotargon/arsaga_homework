@@ -7,6 +7,7 @@ services:
     volumes:
       - .:/var/www/blog
     working_dir: /var/www/blog
+    entrypoint: /var/www/blog/appentry.sh
     networks:
       - app_network
 
