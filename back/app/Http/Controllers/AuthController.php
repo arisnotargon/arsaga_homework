@@ -31,6 +31,30 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        dd('in login', $request->input());
+        $validatedData = $request->validate([
+            'email' => 'required|email|max:255',
+            'password' => 'required|max:255',
+        ]);
+
+        if (!$accessToken = auth('api')->attempt($validatedData)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        return response()->json([
+            'access_token' => $accessToken
+        ]);
+    }
+
+    public function logout()
+    {
+        auth('api')->logout();
+
+        return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    public function me()
+    {
+        dd(auth('api')->user());
+        return response()->json(auth('api')->user());
     }
 }

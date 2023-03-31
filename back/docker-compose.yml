@@ -25,16 +25,17 @@ services:
       - app_network
 
   mysql:
-    image: mysql:8
+    image: mysql:5.7.16
     container_name: laravel_mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: blog
       MYSQL_DATABASE: blog
-      MYSQL_USER: blog
+      MYSQL_USER: root
       MYSQL_PASSWORD: blog
     volumes:
       - ./mysql/data:/var/lib/mysql
+      - ./mysql_conf:/etc/mysql
     ports:
       - "3306:3306"
     networks:
@@ -78,6 +79,30 @@ services:
       - elasticsearch
     networks:
       - app_network
+
+  maxwell:
+    image: zendesk/maxwell
+    container_name: laravel_maxwell
+    entrypoint: bin/maxwell --user=root --password=blog --host=mysql --port=3306 --producer=redis --redis_host=redis --redis_port=6379
+    # entrypoint: bin/maxwell --user=root --password=blog --host=mysql --port=3306 --producer=stdout
+    networks:
+      - app_network
+    depends_on:
+      - mysql
+      - redis
+
+  node:
+    image: node:16.20
+    container_name: laravel_node
+    volumes:
+      - ./es_sync:/var/es_sync
+    entrypoint: node /var/es_sync/consumer.js
+    networks:
+      - app_network
+    depends_on:
+      - redis
+      - maxwell
+
 
 networks:
   app_network:

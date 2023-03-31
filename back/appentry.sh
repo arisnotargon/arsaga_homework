@@ -13,16 +13,7 @@ then
     rm composer-setup.php
 fi
 
-hasPdo=$(php -r "echo extension_loaded('pdo_mysql');")
-
-if hasPdo="1"
-then
-    echo "has mysql"
-else
-    docker-php-ext-install pdo pdo_mysql
-fi
-
-docker-php-ext-install zip
+docker-php-ext-install pdo pdo_mysql zip
 
 cd /var/www/blog
 composer -n install
