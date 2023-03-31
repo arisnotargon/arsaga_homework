@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Elastic\Elasticsearch\ClientBuilder;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
@@ -54,6 +55,7 @@ class AuthController extends Controller
 
     public function me()
     {
+        dd(app('es')->info());
         dd(auth('api')->user());
         return response()->json(auth('api')->user());
     }

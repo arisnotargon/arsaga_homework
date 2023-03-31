@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\User;
+use App\Service\EsSerchService;
 use App\Utils;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class ArticleController extends Controller
 {
@@ -72,15 +74,42 @@ class ArticleController extends Controller
 
     public function list(Request $request)
     {
-        // todo: search
         $pageSize = 2;
 
         $page = (int)$request->input('page', 1);
         $page = $page < 1 ? 1 : $page;
 
-        $query = Article::query();
-        $count = $query->count();
+        $keyword = $request->input('keyword', 1);
+        $keyword = preg_replace("/ +/", ' ', $keyword);
+        $keyword = explode(' ', $keyword);
+
         $offset = ($page - 1) * $pageSize;
+
+        $query = Article::query();
+        $count = 0;
+        if (!empty($keyword[0])) {
+            // search
+            $esService = new EsSerchService();
+            $esService
+                ->index('article')
+                ->size($pageSize)
+                ->from($offset);
+            $esCondition = [];
+            foreach ($keyword as $kw) {
+                $esCondition[] = ['match' => ['content' => $kw]];
+                $esCondition[] = ['match' => ['title' => $kw]];
+            }
+            $esQuery = ['bool' => ['should' => $esCondition]];
+            $esService->setQuery($esQuery);
+            $esRes = $esService->search();
+            $count = $esRes['hits']['total']['value'];
+            $hits = collect($esRes['hits']['hits']);
+            $ids = $hits->pluck('_source')->pluck('id')->toArray();
+            $query = $query->whereIn('id', $ids);
+        } else {
+            $count = $query->count();
+        }
+
         $list = $query
             ->with('user')
             ->orderBy('id', 'desc')

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Elastic\Elasticsearch\ClientBuilder;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -12,6 +13,15 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
+        $this->app->singleton('es', function () {
+            $builder = ClientBuilder::create()->setHosts([
+                config('database.es.host') . ':' . config('database.es.port')
+            ]);
+            if (app()->environment() === 'local') {
+                $builder->setLogger(app('log')->driver());
+            }
+            return $builder->build();
+        });
     }
 
     /**
