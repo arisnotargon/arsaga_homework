@@ -9,13 +9,14 @@ class Article extends Model
 {
     use SoftDeletes;
     protected $table = 'article';
+    protected $dateFormat = 'Y-m-d H:i:s';
     protected $casts = [
         'id' => 'integer',
         'title' => 'string',
         'content' => 'string',
         'uid' => 'integer',
-        'created_at' => 'string',
-        'updated_at' => 'string',
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
     ];
 
     protected $guarded = [];

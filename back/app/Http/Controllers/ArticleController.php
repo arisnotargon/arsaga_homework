@@ -74,7 +74,7 @@ class ArticleController extends Controller
 
     public function list(Request $request)
     {
-        $pageSize = 2;
+        $pageSize = 5;
 
         $page = (int)$request->input('page', 1);
         $page = $page < 1 ? 1 : $page;
@@ -96,8 +96,8 @@ class ArticleController extends Controller
                 ->from($offset);
             $esCondition = [];
             foreach ($keyword as $kw) {
-                $esCondition[] = ['match' => ['content' => $kw]];
-                $esCondition[] = ['match' => ['title' => $kw]];
+                $esCondition[] = ['wildcard' => ['content' => '*' . $kw . '*']];
+                $esCondition[] = ['wildcard' => ['title' => '*' . $kw . '*']];
             }
             $esQuery = ['bool' => ['should' => $esCondition]];
             $esService->setQuery($esQuery);
@@ -107,14 +107,14 @@ class ArticleController extends Controller
             $ids = $hits->pluck('_source')->pluck('id')->toArray();
             $query = $query->whereIn('id', $ids);
         } else {
+            $query = $query->skip($offset)
+                ->take($pageSize);
             $count = $query->count();
         }
 
         $list = $query
             ->with('user')
             ->orderBy('id', 'desc')
-            ->skip($offset)
-            ->take($pageSize)
             ->get()->toArray();
 
         $totalPage = ceil($count / $pageSize);

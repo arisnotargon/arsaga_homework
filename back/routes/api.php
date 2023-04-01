@@ -17,8 +17,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('createAccount', [AuthController::class, 'createAccount']);
-// Route::post('login', [AuthController::class, 'login']);
-Route::post('login', [AuthController::class, 'login'])->middleware('throttle:5,10');
+Route::post('login', [AuthController::class, 'login']);
+// Route::post('login', [AuthController::class, 'login'])->middleware('throttle:5,10');
 
 Route::middleware('auth:api')->group(function () {
     Route::get('me', [AuthController::class, 'me']);

@@ -17,7 +17,7 @@ class AuthController extends Controller
             'password' => 'required|confirmed|max:255',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $validatedData['name'],
             'email' => $validatedData['email'],
             'password' => bcrypt($validatedData['password']),
@@ -26,6 +26,8 @@ class AuthController extends Controller
         $accessToken = auth('api')->attempt($validatedData);
 
         return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
             'access_token' => $accessToken
         ]);
     }
@@ -40,8 +42,11 @@ class AuthController extends Controller
         if (!$accessToken = auth('api')->attempt($validatedData)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+        $user = auth('api')->user();
 
         return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
             'access_token' => $accessToken
         ]);
     }
@@ -55,8 +60,10 @@ class AuthController extends Controller
 
     public function me()
     {
-        dd(app('es')->info());
-        dd(auth('api')->user());
-        return response()->json(auth('api')->user());
+        $user = auth('api')->user();
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name
+        ]);
     }
 }
