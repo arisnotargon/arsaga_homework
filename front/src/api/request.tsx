@@ -20,7 +20,7 @@ const post = async (url: string, data: any) => {
     return await axios.post(url, data, config)
 }
 
-const get = async (url: string, data: any) => {
+const get = async (url: string, data: any = {}) => {
     const jwt = localStorage.getItem("jwt");
     const config = {
         headers:{
@@ -43,19 +43,24 @@ const login = async (loginInfo: loginInfoType) => {
 }
 
 const logout = async () => { 
-    const response = await get(host + ':' + port + '/logout', {})
+    const response = await get(host + ':' + port + '/logout')
     return response;
 }
 
 const blogList = async(data: BlogListReqDataType) => { 
     const response = await get(host + ':' + port + '/article', data)
-    console.log('blogList response', response)
     return response;
 }
 
+// get login user info
+const me = async() => { 
+    const response = await get(host + ':' + port + '/me')
+    return response;
+}
 export {
     regist,
     logout,
     login,
     blogList,
+    me,
 };

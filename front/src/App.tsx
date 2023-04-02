@@ -3,11 +3,11 @@ import './App.css';
 
 import {DesktopOutlined} from '@ant-design/icons';
 import type { MenuProps  } from 'antd';
-import { Layout, Menu, theme, Dropdown, Button } from 'antd';
+import { Layout, Menu, Dropdown, Button } from 'antd';
 
 import { showRegistModal, Regist as RegistModal } from './components/regist';
 import { showLoginModal, Login as LoginModal } from './components/login';
-import { logout as logoutRequest } from './api/request'
+import { logout as logoutRequest, me as meRequest } from './api/request'
 import Welcome from './components/welcome';
 import BlogList from './components/blogList';
 
@@ -26,7 +26,6 @@ function getItem(
   icon?: React.ReactNode,
   children?: MenuItem[],
   type?: 'group',
-  onSelect?: Function
 ): MenuItem {
   return {
     key,
@@ -43,14 +42,23 @@ const items: MenuItem[] = [
 
 const App: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
 
   const [userInfo, setUserInfo] = useState({
     userName: '',
     userId: 0,
   } as UserInfoType);
+
+  useEffect(() => { 
+    meRequest().then(response => { 
+      console.log('meRequest then', response);
+      setUserInfo({
+        userId: response.data.id,
+        userName: response.data.name,
+      });
+    }).catch(e => {
+      console.log('meRequest catch', e);
+    })
+   }, []);
 
   const notLogedIn: MenuProps['items'] = [
     {

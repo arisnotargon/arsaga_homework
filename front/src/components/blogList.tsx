@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Col, Row ,Typography, Avatar, List, Skeleton} from 'antd';
+import { Col, Row ,Typography, Avatar, List, Skeleton, Input, Button, Pagination } from 'antd';
 import { blogList as blogListRequest } from '../api/request';
 import { AxiosError } from 'axios';
-import type { UserInfoType } from '../App'
+import type { UserInfoType } from '../App';
+import type { PaginationProps } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+
 
 const { Text } = Typography;
 //BasicProps
@@ -35,8 +38,8 @@ const BlogList = ({ header, setUserInfo, logout, userInfo }: Props) => {
     const [articleList, setArticleList] = useState([] as Array<Article>);
     const [page, setPage] = useState(1);
     const [searchKeyword, setSearchKeyword] = useState('');
-    const [nowSearchKeyword, setNowSearchKeyword] = useState('');
-    const [totalpage, setTotalpage] = useState(0);
+    const [currentSearchKeyword, setCurrentSearchKeyword] = useState('');
+    const [total, setTotal] = useState(0);
 
     const callBlogListRequest = async (data: BlogListReqDataType) => { 
         try {
@@ -44,8 +47,7 @@ const BlogList = ({ header, setUserInfo, logout, userInfo }: Props) => {
             console.log('in callBlogListRequest', response);
             const resData = response.data;
             setArticleList(resData.list);
-            setTotalpage(resData.totalPage);
-
+            setTotal(resData.total);
         } catch (e) { 
             if (e instanceof AxiosError) {
                 if (e.response?.status === 401) { 
@@ -63,18 +65,60 @@ const BlogList = ({ header, setUserInfo, logout, userInfo }: Props) => {
             page: 1,
             keyword: ''
         });
-     }, []);
+    }, []);
+    
+
+    const paginationItemRender: PaginationProps['itemRender'] = (idx, type, originalElement) => {
+        console.log('in paginationItemRender', idx, type, originalElement);
+        if (type === 'prev') {
+            return <a>Previous</a>;
+        }
+        if (type === 'next') {
+            return <a>Next</a>;
+        }
+        return originalElement;
+    };
     
     return(
         <>
             <header >
                 <Row >
-                    <Col span={8}> </Col>
+                    <Col span={8} />
                     <Col span={8}><Text style={{fontSize:'12vh'}} type="success">Blog List</Text></Col>
-                    <Col span={8}> </Col>
+                    <Col span={8} />
                 </Row>
             </header> 
-            <div style={{ padding: 24, minHeight: 360  }}>
+            <div style={{ padding: 24, minHeight: 360 }}>
+                <Row >
+                    <Col span={8} />
+                    <Col span={12} />
+                    <Col span={3} >
+                        <Input
+                            name='search'
+                            value={searchKeyword}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                setSearchKeyword(e.target.value);
+                            }}
+                            placeholder='keywords'
+                        />
+                    </Col>
+                    <Col span={1} >
+                        <Button
+                            type={"primary"}
+                            icon={<SearchOutlined />}
+                            onClick={() => {
+                                setPage(1);
+                                setCurrentSearchKeyword(searchKeyword);
+                                callBlogListRequest({
+                                    page: 1,
+                                    keyword: searchKeyword
+                                })
+                             }}
+                        >
+                            Search
+                        </Button>
+                    </Col>
+                </Row>
                 <List
                     itemLayout="horizontal"
                     dataSource={articleList}
@@ -98,6 +142,19 @@ const BlogList = ({ header, setUserInfo, logout, userInfo }: Props) => {
                             </Skeleton>
                     </List.Item>
                     )}
+                />
+                <Pagination
+                    pageSize={5}
+                    current={page}
+                    defaultCurrent={1}
+                    total={total}
+                    onChange={(newPage: number, pageSize: number) => {
+                        setPage(newPage);
+                        callBlogListRequest({
+                            page: newPage,
+                            keyword: currentSearchKeyword
+                        })
+                    }}
                 />
             </div>
         </>

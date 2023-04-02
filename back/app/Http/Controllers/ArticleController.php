@@ -79,7 +79,7 @@ class ArticleController extends Controller
         $page = (int)$request->input('page', 1);
         $page = $page < 1 ? 1 : $page;
 
-        $keyword = $request->input('keyword', 1);
+        $keyword = $request->input('keyword');
         $keyword = preg_replace("/ +/", ' ', $keyword);
         $keyword = explode(' ', $keyword);
 
@@ -107,9 +107,9 @@ class ArticleController extends Controller
             $ids = $hits->pluck('_source')->pluck('id')->toArray();
             $query = $query->whereIn('id', $ids);
         } else {
+            $count = $query->count();
             $query = $query->skip($offset)
                 ->take($pageSize);
-            $count = $query->count();
         }
 
         $list = $query
@@ -117,7 +117,6 @@ class ArticleController extends Controller
             ->orderBy('id', 'desc')
             ->get()->toArray();
 
-        $totalPage = ceil($count / $pageSize);
         foreach ($list as $k => $article) {
             $article['uname'] = $article['user']['name'];
             unset($article['user']);
@@ -126,7 +125,7 @@ class ArticleController extends Controller
 
         return response()->json([
             'list' => $list,
-            'totalPage' => $totalPage
+            'total' => $count
         ]);
     }
 
