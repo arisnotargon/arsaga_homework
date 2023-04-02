@@ -5,6 +5,7 @@ import { AxiosError } from 'axios';
 import type { UserInfoType } from '../App';
 import type { PaginationProps } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
+import { showBlogDetailModal , BlogDetail as BlogDetailModal } from './blogDetail'
 
 
 const { Text } = Typography;
@@ -42,6 +43,8 @@ const BlogList = ({ header, setUserInfo, logout, userInfo }: Props) => {
     const [total, setTotal] = useState(0);
 
     const callBlogListRequest = async (data: BlogListReqDataType) => { 
+        setArticleList([]);
+        setTotal(0);
         try {
             const response = await blogListRequest(data);
             console.log('in callBlogListRequest', response);
@@ -67,6 +70,13 @@ const BlogList = ({ header, setUserInfo, logout, userInfo }: Props) => {
             keyword: ''
         });
     }, []);
+
+    const reloadList = () => {
+        callBlogListRequest({
+            page: page,
+            keyword: searchKeyword
+        })
+    }
     
     const deleteBlog = async (id: number) => {
         try {
@@ -146,7 +156,10 @@ const BlogList = ({ header, setUserInfo, logout, userInfo }: Props) => {
                             <Skeleton avatar title={false} loading={false} active>
                                 <List.Item.Meta
                                     // avatar={<Avatar src={item.picture.large} />}
-                                    title={<a href="!#">{item.title}</a>}
+                                    title={<a href="!#" onClick={() => {
+                                        // console.log(showBlogDetailModal);
+                                        showBlogDetailModal(item.id);
+                                    }}>{item.title}</a>}
                                     description={item.content.length < 10
                                         ? item.content : item.content.substring(0, 10) + '...'}
                                 />
@@ -172,6 +185,7 @@ const BlogList = ({ header, setUserInfo, logout, userInfo }: Props) => {
                     }}
                 />
             </div>
+            <BlogDetailModal logout={logout} userId={userInfo.userId} reloadList={ reloadList } />
         </>
     )
  };
