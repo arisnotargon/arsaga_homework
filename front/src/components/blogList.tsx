@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Col, Row ,Typography, Avatar, List, Skeleton, Input, Button, Pagination } from 'antd';
-import { blogList as blogListRequest } from '../api/request';
+import { blogList as blogListRequest,deleteBlog as deleteBlogRequest } from '../api/request';
 import { AxiosError } from 'axios';
 import type { UserInfoType } from '../App';
 import type { PaginationProps } from 'antd';
@@ -61,24 +61,37 @@ const BlogList = ({ header, setUserInfo, logout, userInfo }: Props) => {
     }
 
     useEffect(() => {
+        // init
         callBlogListRequest({
             page: 1,
             keyword: ''
         });
     }, []);
     
-
-    const paginationItemRender: PaginationProps['itemRender'] = (idx, type, originalElement) => {
-        console.log('in paginationItemRender', idx, type, originalElement);
-        if (type === 'prev') {
-            return <a>Previous</a>;
+    const deleteBlog = async (id: number) => {
+        try {
+            const response = await deleteBlogRequest(id);
+            console.log('in deleteBlog', response);
+            
+            // reload
+            callBlogListRequest({
+                page: page,
+                keyword: currentSearchKeyword
+            });
+        } catch (e) { 
+            if (e instanceof AxiosError) {
+                if (e.response?.status === 401) { 
+                    // ログイン状態無効になった
+                    logout();
+                } else if (e.response?.status === 403) { 
+                    // 削除権限なし
+                    console.log('todo:削除権限なしのtips');
+                }
+            } else {
+                console.log('deleteBlogRequest error=>',e);
+            }
         }
-        if (type === 'next') {
-            return <a>Next</a>;
-        }
-        return originalElement;
-    };
-    
+     };
     return(
         <>
             <header >
@@ -126,7 +139,9 @@ const BlogList = ({ header, setUserInfo, logout, userInfo }: Props) => {
                         <List.Item actions={
                             // 自分の文章を編集、削除できる
                             userInfo.userId === item.uid ?
-                            [<a key="list-loadmore-edit">edit</a>, <a key="list-loadmore-more">more</a>] : []
+                                [<a key="list-edit">edit</a>, <a key="list-delete" onClick={() => {
+                                    deleteBlog(item.id)
+                                }}>delete</a>] : []
                         }>
                             <Skeleton avatar title={false} loading={false} active>
                                 <List.Item.Meta

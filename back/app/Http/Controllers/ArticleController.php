@@ -94,12 +94,22 @@ class ArticleController extends Controller
                 ->index('article')
                 ->size($pageSize)
                 ->from($offset);
-            $esCondition = [];
             foreach ($keyword as $kw) {
                 $esCondition[] = ['wildcard' => ['content' => '*' . $kw . '*']];
                 $esCondition[] = ['wildcard' => ['title' => '*' . $kw . '*']];
             }
-            $esQuery = ['bool' => ['should' => $esCondition]];
+            $esQuery = [
+                'bool' => [
+                    'must' => [
+                        'bool' => [
+                            'must_not' => [
+                                'exists' => ['field' => 'deleted_at'] // sof_delete　削除した項目を排除
+                            ],
+                            'should' => $esCondition
+                        ]
+                    ]
+                ]
+            ];
             $esService->setQuery($esQuery);
             $esRes = $esService->search();
             $count = $esRes['hits']['total']['value'];

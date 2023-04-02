@@ -14,7 +14,7 @@ const Welcome = ({ header }: Props) => {
             <header >
                 <Row >
                     <Col span={8}> </Col>
-                    <Col span={8}><Text style={{fontSize:'12vh'}} type="success">Home page</Text></Col>
+                    <Col span={8}><Text style={{fontSize:'8vh'}} type="success">Home page</Text></Col>
                     <Col span={8}> </Col>
                 </Row>
             </header> 

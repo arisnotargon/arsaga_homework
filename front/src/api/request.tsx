@@ -32,6 +32,18 @@ const get = async (url: string, data: any = {}) => {
     return await axios.get(url, config)
 }
 
+const deleteMethod = async (url: string, data: any = {}) => {
+    const jwt = localStorage.getItem("jwt");
+    const config = {
+        headers:{
+            Authorization: "Bearer " + jwt,
+        },
+        params: data,
+    };
+
+    return await axios.delete(url, config);
+}
+
 const regist = async (registInfo: registInfoType) => { 
     const response = await post(host + ':' + port + '/createAccount', registInfo)
     return response;
@@ -57,10 +69,16 @@ const me = async() => {
     const response = await get(host + ':' + port + '/me')
     return response;
 }
+
+const deleteBlog = async (id: number) => {
+    const response = await deleteMethod(host + ':' + port + `/article/${id}`);
+    return response;
+}
 export {
     regist,
     logout,
     login,
     blogList,
     me,
+    deleteBlog,
 };

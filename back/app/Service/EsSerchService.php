@@ -56,6 +56,7 @@ class EsSerchService
         if (!empty($this->query)) {
             $param['body']['query'] = $this->query;
         }
+        // dd($param, json_encode($param));
 
         $client = app('es');
 
