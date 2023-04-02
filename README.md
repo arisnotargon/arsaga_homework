@@ -1,22 +1,28 @@
 # arsaga_homework
 
-（課題） PHP/Laravelのオリジナルサイト作成
-PHP/Laravelで下記の要件を満たしたオリジナルサイトを作成し、GitHubにコードを上げてください。
-（ローカル環境の場合は画面操作の動画キャプチャなどをReadmeに添付）
 
-## ■ 要件1. 必須機能
-・ 認証機能
-・ CRUD処理
-・ 検索機能
-・ フロントエンド
--デザインを整える（Bootstrap,TailWindCSSなど可）
--bladeを利用 or NuxtやNextを利用 どちらでも可
+## ■ 使い方
+### ■ サーバー側
+docker-compose up -d で起動し、docker-compose psで各コンテナの状態を確認できます。
+appコンテナ起動時いろんな操作（ライブラリーインストール、設定、マイグレート）があるので、一分間ほどお待ちください。詳しくはback/appentry.shを参考してください。
+起動できたら、下記のコマンドを使って、サーバー側を動作確認できます。
+```bash
+curl --location '127.0.0.1:8080/createAccount' \
+--header 'X-Requested-With: XMLHttpRequest' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "email": "asd111@gmail.com",
+    "name": "assad11",
+    "password": "123321",
+    "password_confirmation":"123321"
+}'
+```
+ステータスコードは200になったら、サーバー側の起動完了しました。
 
-## ■ 要件2. 下記のうちどれか1つを選択
-1. AWSを使用した本番公開
-2. 外部APIを利用した機能
-3. Dockerでの環境構築
-※Laravel-sail機能を用いず、自身で docker-compose.yml を作成しコンテナを構築すること
-　（docker-compose.ymlをGitHubにあげること）
-4. S3を利用した画像のupload機能
-5. CSVのインポート/ダウンロード機能
+### ■ フロントエンド
+下記のコマンドでフロントエンドをインストール、起動
+```bash
+cd front
+yarn install
+yarn start
+```

@@ -17,7 +17,9 @@ docker-php-ext-install pdo pdo_mysql zip
 
 cd /var/www/blog
 
-# cp /var/www/blog/.env.example /var/www/blog/.env
+cp /var/www/blog/.env.example /var/www/blog/.env
+
+php artisan migrate
 
 # php:8-fpm元々のentrypoint
 # 参考元：https://hub.docker.com/layers/library/php/8-fpm/images/sha256-5a955d7505e67c35644c9c9220e657bc9636b920ac6edb833bd685777aedd9b4?context=explore
